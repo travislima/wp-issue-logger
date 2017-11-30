@@ -41,7 +41,9 @@ function wpil_register_post_type() {
 
     	'public' => true, 
     	'label' => 'WP Issue Logger',
-    	'labels' => $labels
+    	'labels' => $labels,
+        'menu_icon' => 'dashicons-image-filter'
+      
 
     );
 

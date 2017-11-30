@@ -42,9 +42,20 @@ function wpil_register_post_type() {
     	'public' => true, 
     	'label' => 'WP Issue Logger',
     	'labels' => $labels,
-        'menu_icon' => 'dashicons-image-filter'
-      
-
+        'menu_icon' => 'dashicons-image-filter',
+        'capability_type' => 'page',
+        'map_meta_cap' => true,
+        'supports' => array(
+            'title',
+            'editor',
+            'comments',
+            'revisions',
+            'author', 
+            'page-attributes',
+          //  'thumbnail',
+            'custom-fields',
+           // 'post-formats'
+        )
     );
 
     register_post_type( 'issue', $args);

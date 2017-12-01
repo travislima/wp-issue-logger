@@ -11,12 +11,14 @@ Text Domain:  wpil
 Domain Path:  /languages
 */
 
-/*
+
 //EXit if accessed directly
 if ( ! defined('ABSPATH')) {
     exit;
 }
-*/
+
+require_once ( plugin_dir_path(__FILE__) . 'wp-issue-logger-shortcode.php');
+
 
 function wpil_register_post_type() {
 
@@ -42,9 +44,20 @@ function wpil_register_post_type() {
     	'public' => true, 
     	'label' => 'WP Issue Logger',
     	'labels' => $labels,
+        'show_in_admin_bar' => true,
         'menu_icon' => 'dashicons-image-filter',
         'capability_type' => 'page',
         'map_meta_cap' => true,
+        'has_archive' => true,
+        'rewrite'     => array (
+            'slug' => 'issues',
+            'with_front' => true,
+            'pages' => true,
+            'feeds' => true
+        
+        ),
+      
+
         'supports' => array(
             'title',
             'editor',
@@ -63,3 +76,24 @@ function wpil_register_post_type() {
 }
 
 add_action( 'init', 'wpil_register_post_type');
+
+
+// Flush Permalink on Plugin activation.
+
+
+function wpil_rewrite_flush() {
+    // First, we "add" the custom post type via the above written function.
+    // Note: "add" is written with quotes, as CPTs don't get added to the DB,
+    // They are only referenced in the post_type column with a post entry, 
+    // when you add a post of this CPT.
+    my_cpt_init();
+
+    // ATTENTION: This is *only* done during plugin activation hook in this example!
+    // You should *NEVER EVER* do this on every page load!!
+    flush_rewrite_rules();
+}
+register_activation_hook( __FILE__, 'wpil_rewrite_flush' );
+
+
+
+

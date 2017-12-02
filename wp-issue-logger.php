@@ -80,7 +80,6 @@ add_action( 'init', 'wpil_register_post_type');
 
 // Flush Permalink on Plugin activation.
 
-
 function wpil_rewrite_flush() {
     // First, we "add" the custom post type via the above written function.
     // Note: "add" is written with quotes, as CPTs don't get added to the DB,
@@ -96,4 +95,28 @@ register_activation_hook( __FILE__, 'wpil_rewrite_flush' );
 
 
 
+//override archive-issue page with custom page from plugin folder
+
+/** Enqueue CSS */
+add_action( 'wp_enqueue_scripts', 'prefix_add_my_stylesheet' );
+
+function prefix_add_my_stylesheet() {
+   wp_register_style( 'cpt-style', plugins_url( 'css/style.css', __FILE__) );
+   wp_enqueue_style( 'cpt-style' );
+}
+
+// force use of templates from plugin folder
+function cpte_force_template( $template )
+{	
+    if( is_archive( 'issue' ) ) {
+        $template = WP_PLUGIN_DIR .'/'. plugin_basename( dirname(__FILE__) ) .'/archive-issue.php';
+	}
+ 
+	if( is_singular( 'issue' ) ) {
+        $template = WP_PLUGIN_DIR .'/'. plugin_basename( dirname(__FILE__) ) .'/single-issue.php';
+	}
+ 
+    return $template;
+}
+add_filter( 'template_include', 'cpte_force_template' );
 

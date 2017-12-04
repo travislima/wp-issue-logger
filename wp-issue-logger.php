@@ -46,11 +46,12 @@ function wpil_register_post_type() {
     	'labels' => $labels,
         'show_in_admin_bar' => true,
         'menu_icon' => 'dashicons-image-filter',
-        'capability_type' => 'page',
+        'capability_type' => 'post',
         'map_meta_cap' => true,
         'has_archive' => true,
+        'register_meta_box_cb' => 'wpt_add_event_metaboxes',
         'rewrite'     => array (
-            'slug' => 'issues',
+            'slug' => 'events',
             'with_front' => true,
             'pages' => true,
             'feeds' => true
@@ -111,12 +112,52 @@ function cpte_force_template( $template )
     if( is_archive( 'issue' ) ) {
         $template = WP_PLUGIN_DIR .'/'. plugin_basename( dirname(__FILE__) ) .'/archive-issue.php';
 	}
- 
-	if( is_singular( 'issue' ) ) {
+
+	/* if( is_singular( 'issue' ) ) {
         $template = WP_PLUGIN_DIR .'/'. plugin_basename( dirname(__FILE__) ) .'/single-issue.php';
 	}
- 
+ */
     return $template;
 }
 add_filter( 'template_include', 'cpte_force_template' );
 
+
+
+/*===================================================================================*/
+
+/**
+ * Adds a metabox to the right side of the screen under the â€œPublishâ€ box
+ */
+function wpt_add_event_metaboxes() {
+    add_meta_box(
+        'wpt_events_location',
+        'Event Location',
+        'wpt_events_location',
+        'issue',
+        'side',
+        'default'
+
+    );
+}
+
+
+
+/**
+ * Output the HTML for the metabox.
+ */
+function wpt_events_location() {
+    global $post;
+    // Nonce field to validate form request came from current site
+    wp_nonce_field( basename( __FILE__ ), 'event_fields' );
+    // Get the location data if it's already been entered
+    $location = get_post_meta( $post->ID, 'status', true );
+    // Output the field
+    echo /*'<input  name="location" placeholder="Example - Text" value="' . esc_textarea( $location )  . '" class="widefat">*/
+
+    '<input type="radio" name="status" value="new"> New
+    <input type="radio" name="status" value="in_progress"> In Progress
+    <input type="radio" name="status" value="completed"> Completed';
+}
+
+
+add_action( 'add_meta_boxes', 'wpt_add_event_metaboxes' );

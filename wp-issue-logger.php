@@ -17,26 +17,26 @@ if ( ! defined('ABSPATH')) {
     exit;
 }
 
-require_once ( plugin_dir_path(__FILE__) . 'wp-issue-logger-shortcode.php');
+ require_once ( plugin_dir_path(__FILE__) . 'wp-issue-logger-shortcode.php');
 
 
 function wpil_register_post_type() {
 
 
 		$labels = array(
-        'name'                => _x( 'Issues', 'Post Type General Name' ),
-        'singular_name'       => _x( 'Issue', 'Post Type Singular Name' ),
-        'menu_name'           => __( 'WP Issue Logger' ),
-        'parent_item_colon'   => __( 'Main Issue'),
-        'all_items'           => __( 'All Issues' ),
-        'view_item'           => __( 'View Issue'),
-        'add_new_item'        => __( 'Add New Issue' ),
-        'add_new'             => __( 'Add New' ),
-        'edit_item'           => __( 'Edit Issue' ),
-        'update_item'         => __( 'Update Issue' ),
-        'search_items'        => __( 'Search Issue' ),
-        'not_found'           => __( 'Not Found' ),
-        'not_found_in_trash'  => __( 'Not found in Trash' ),
+        'name'                => ( 'Issues' ),
+        'singular_name'       => ( 'Issue' ),
+        'menu_name'           => ( 'WP Issue Logger' ),
+        'parent_item_colon'   => ( 'Main Issue'),
+        'all_items'           => ( 'All Issues' ),
+        'view_item'           => ( 'View Issue'),
+        'add_new_item'        => ( 'Add New Issue' ),
+        'add_new'             => ( 'Add New' ),
+        'edit_item'           => ( 'Edit Issue' ),
+        'update_item'         => ( 'Update Issue' ),
+        'search_items'        => ( 'Search Issue' ),
+        'not_found'           => ( 'Not Found' ),
+        'not_found_in_trash'  => ( 'Not found in Trash' ),
     );
 
     $args = array( 
@@ -67,7 +67,7 @@ function wpil_register_post_type() {
             'author', 
             'page-attributes',
           //  'thumbnail',
-            'custom-fields',
+          //  'custom-fields',
            // 'post-formats'
         )
     );
@@ -121,12 +121,43 @@ function cpte_force_template( $template )
 }
 add_filter( 'template_include', 'cpte_force_template' );
 
+/**
+ * Add issue status taxonomy
+*/
+add_action( 'init', 'create_issueCategory_tax' );
 
+function create_issueCategory_tax() {
 
+    $taxlabels = array(
+		'name'              => ( 'Issue Categories' ),
+		'singular_name'     => ( 'Issue Category'  ),
+		'search_items'      => ( 'Search Categories'  ),
+		'all_items'         => ( 'All Categories'),
+		'parent_item'       => ( 'Parent Category'),
+		'parent_item_colon' => ( 'Parent Category:'),
+		'edit_item'         => ( 'Edit Category'),
+		'update_item'       => ( 'Update Category'),
+		'add_new_item'      => ( 'Add New Category'),
+		'new_item_name'     => ( 'New Category Name'),
+        'menu_name'         => ( 'Categories'),
+    );
+
+	register_taxonomy(
+		'type',
+		'issue',
+		array(
+            'label' => 'Issue Category',
+            'labels' => $taxlabels,
+			'rewrite' => array( 'slug' => 'issuucat' ),
+            'hierarchical' => true,
+            'description' => 'Categorise your issues with different tags suchs as "New Features", "Bug", "Errors"'
+		)
+	);
+}
 /*===================================================================================*/
 
 /**
- * Adds a metabox to the right side of the screen under the â€œPublishâ€ box
+ * Adds a metabox to the right side of the screen under the Publish box
  */
 function wpt_add_event_metaboxes() {
     add_meta_box(
@@ -161,3 +192,4 @@ function wpt_events_location() {
 
 
 add_action( 'add_meta_boxes', 'wpt_add_event_metaboxes' );
+

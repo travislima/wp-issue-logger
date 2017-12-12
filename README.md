@@ -1,11 +1,17 @@
 === WP Issue Logger ===
 
 Contributors: travislima, jmfloor
-Tags: issue logger, task, to do, project management,
+
+Tags: issue logger, task, to do, project management
+
 Requires at least: 4.7
-Tested up to: 4.9.0
+
+Tested up to: 4.8.4
+
 Stable tag: trunk
+
 License: GPLv2 or later
+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 A quick and easy WordPress Issue Logging system.

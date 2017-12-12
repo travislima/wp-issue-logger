@@ -7,7 +7,7 @@ Author:       Travis Lima, Johannes Floor
 Author URI:   travislima.com
 License:      GPL2
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
-Text Domain:  wpil
+Text Domain:  wp-issue-logger
 Domain Path:  /languages
 */
 
@@ -17,15 +17,15 @@ if ( ! defined('ABSPATH')) {
     exit;
 }
 
- require_once ( plugin_dir_path(__FILE__) . 'wp-issue-logger-shortcode.php');
+require_once ( plugin_dir_path(__FILE__) . 'wp-issue-logger-shortcode.php');
 
 
 function wpil_register_post_type() {
 
 
 		$labels = array(
-        'name'                => ( 'Issues' ),
-        'singular_name'       => ( 'Issue' ),
+        'name'                => __( 'Issues' ),
+        'singular_name'       => __( 'Issue' ),
         'menu_name'           => ( 'WP Issue Logger' ),
         'parent_item_colon'   => ( 'Main Issue'),
         'all_items'           => ( 'All Issues' ),
@@ -51,7 +51,7 @@ function wpil_register_post_type() {
         'has_archive' => true,
         'register_meta_box_cb' => 'wpt_add_event_metaboxes',
         'rewrite'     => array (
-            'slug' => 'events',
+            'slug' => 'issues',
             'with_front' => true,
             'pages' => true,
             'feeds' => true
@@ -78,7 +78,6 @@ function wpil_register_post_type() {
 
 add_action( 'init', 'wpil_register_post_type');
 
-
 // Flush Permalink on Plugin activation.
 
 function wpil_rewrite_flush() {
@@ -86,25 +85,28 @@ function wpil_rewrite_flush() {
     // Note: "add" is written with quotes, as CPTs don't get added to the DB,
     // They are only referenced in the post_type column with a post entry, 
     // when you add a post of this CPT.
-    my_cpt_init();
+    wpil_register_post_type();
 
     // ATTENTION: This is *only* done during plugin activation hook in this example!
     // You should *NEVER EVER* do this on every page load!!
     flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'wpil_rewrite_flush' );
+register_deactivation_hook( __FILE__, 'wpil_rewrite_flush' );
 
 
 
 //override archive-issue page with custom page from plugin folder
 
 /** Enqueue CSS */
-add_action( 'wp_enqueue_scripts', 'prefix_add_my_stylesheet' );
 
-function prefix_add_my_stylesheet() {
-   wp_register_style( 'cpt-style', plugins_url( 'css/style.css', __FILE__) );
-   wp_enqueue_style( 'cpt-style' );
-}
+ // ******** ADD THIS IN ONLY IF YOU ARE GOING TO STYLE FRONT-END CPT PAGES/ELEMENTS ********* //
+// add_action( 'wp_enqueue_scripts', 'prefix_add_my_stylesheet' );
+
+// function prefix_add_my_stylesheet() {
+//    wp_register_style( 'wpil-cpt-style', plugins_url( 'css/style.css', __FILE__) );
+//    wp_enqueue_style( 'cpt-style' );
+// }
 
 // force use of templates from plugin folder
 function cpte_force_template( $template )
@@ -119,7 +121,7 @@ function cpte_force_template( $template )
  */
     return $template;
 }
-add_filter( 'template_include', 'cpte_force_template' );
+// add_filter( 'template_include', 'cpte_force_template' );
 
 /**
  * Add issue status taxonomy
@@ -128,8 +130,10 @@ add_action( 'init', 'create_issueCategory_tax' );
 
 function create_issueCategory_tax() {
 
+
+
     $taxlabels = array(
-		'name'              => ( 'Issue Categories' ),
+		'name'              => __( 'Issue Categories', 'wp-issue-logger' ),
 		'singular_name'     => ( 'Issue Category'  ),
 		'search_items'      => ( 'Search Categories'  ),
 		'all_items'         => ( 'All Categories'),
@@ -148,7 +152,7 @@ function create_issueCategory_tax() {
 		array(
             'label' => 'Issue Category',
             'labels' => $taxlabels,
-			'rewrite' => array( 'slug' => 'issuucat' ),
+			'rewrite' => array( 'slug' => 'issue-category' ),
             'hierarchical' => true,
             'description' => 'Categorise your issues with different tags suchs as "New Features", "Bug", "Errors"'
 		)
@@ -159,11 +163,11 @@ function create_issueCategory_tax() {
 /**
  * Adds a metabox to the right side of the screen under the Publish box
  */
-function wpt_add_event_metaboxes() {
+function wpil_add_meta_box() {
     add_meta_box(
-        'wpt_events_location',
-        'Event Location',
-        'wpt_events_location',
+        'wpil_issue_status',
+        __( 'Issue Status', 'wp-issue-logger' ),
+        'wpil_issue_status_show_metabox',
         'issue',
         'side',
         'default'
@@ -171,25 +175,42 @@ function wpt_add_event_metaboxes() {
     );
 }
 
-
-
 /**
  * Output the HTML for the metabox.
  */
-function wpt_events_location() {
+function wpil_issue_status_show_metabox() {
     global $post;
+    // **** CREATE NONCE AND CHECK IT / NOT NEEDED ATM THOUGH ****
     // Nonce field to validate form request came from current site
-    wp_nonce_field( basename( __FILE__ ), 'event_fields' );
+    // wp_nonce_field( basename( __FILE__ ), 'event_fields' );
     // Get the location data if it's already been entered
-    $location = get_post_meta( $post->ID, 'status', true );
-    // Output the field
-    echo /*'<input  name="location" placeholder="Example - Text" value="' . esc_textarea( $location )  . '" class="widefat">*/
+    $issue_status = get_post_meta( $post->ID, 'wpil_status', true );
+    ?>
 
-    '<input type="radio" name="status" value="new"> New
-    <input type="radio" name="status" value="in_progress"> In Progress
-    <input type="radio" name="status" value="completed"> Completed';
+    <select name="wpil-issue-status" id="wpil-issue-status">
+        <option value="new" <?php selected( 'new', $issue_status, true); ?> >New</option>
+        <option value="in-progress" <?php selected( 'in-progress', $issue_status, true); ?> >In Progress</option>
+        <option value="completed" <?php selected( 'completed', $issue_status, true); ?> >Completed</option>
+    </select>
+    <?php
 }
+add_action( 'add_meta_boxes', 'wpil_add_meta_box' );
 
+/* Save post meta on the 'save_post' hook. */
+add_action( 'save_post', 'smashing_save_post_class_meta', 10, 2 );
 
-add_action( 'add_meta_boxes', 'wpt_add_event_metaboxes' );
+/* Save the meta box's post metadata. */
+function smashing_save_post_class_meta( $post_id, $post ) {
+
+    // check to see if post_type is 'issue', if not return $post_id;
+
+    $status = $_REQUEST['wpil-issue-status'];
+
+    if( !empty( $status ) ){
+        update_post_meta( $post_id, 'wpil_status', $status );
+    }else{
+        delete_post_meta( $post_id, 'wpil_status' );
+    }
+
+}
 

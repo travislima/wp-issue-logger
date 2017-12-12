@@ -16,7 +16,6 @@ if ( ! defined('ABSPATH')) {
     exit;
 }
 
-require_once ( plugin_dir_path(__FILE__) . 'wp-issue-logger-shortcode.php');
 function wpil_register_post_type() {
 		$labels = array(
         'name'                => __( 'Issues', 'wp-issue-logger' ),

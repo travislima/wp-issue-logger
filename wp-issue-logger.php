@@ -155,3 +155,29 @@ function wpil_save_post_class_meta( $post_id, $post ) {
         delete_post_meta( $post_id, 'wpil_status' );
     }
 }
+
+
+/*===== Show status column in the post admin page ======*/
+
+add_filter('manage_issue_posts_columns', 'wpil_columns_head', 10);
+add_action('manage_issue_posts_custom_column', 'wpil_columns_content', 10, 2);
+
+// ADD NEW COLUMN
+function wpil_columns_head($columns) {
+    
+    return array(
+        'cb' => '<input type="checkbox"/>',
+        'title' => __('Title'),
+        'wpil_status' => __('Status', 'wp-issue-logger'),
+        'author' => __('Author'),
+        'date' => __('Date') 
+    );
+}
+ 
+// SHOW THE STATUS OF THE ISSUE
+function wpil_columns_content($column_name, $post_ID) {
+ 
+    if ($column_name == 'wpil_status') {
+        echo get_post_meta( $post_ID, 'wpil_status', true );;
+    }
+}

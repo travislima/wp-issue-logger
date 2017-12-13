@@ -144,9 +144,9 @@ function wpil_issue_status_show_metabox() {
 
 add_action( 'add_meta_boxes', 'wpil_add_meta_box' );
 /* Save post meta on the 'save_post' hook. */
-add_action( 'save_post', 'smashing_save_post_class_meta', 10, 2 );
+add_action( 'save_post', 'wpil_save_post_class_meta', 10, 2 );
 /* Save the meta box's post metadata. */
-function smashing_save_post_class_meta( $post_id, $post ) {
+function wpil_save_post_class_meta( $post_id, $post ) {
     // check to see if post_type is 'issue', if not return $post_id;
     $status = $_REQUEST['wpil-issue-status'];
     if( !empty( $status ) ){
